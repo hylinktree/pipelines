@@ -60,10 +60,11 @@ def print_op(message: str):
     description='Shows how to use dsl.Condition().'
 )
 def flipcoin_pipeline():
+    lower_thresh = 4
     flip = flip_coin_op()
     with dsl.Condition(flip.output == 'heads'):
         random_num_head = get_random_int_op(0, 9)
-        with dsl.Condition(random_num_head.output > 5):
+        with dsl.Condition(random_num_head.output >lower_thresh):
             print_op('heads and %s > 5!' % random_num_head.output)
         with dsl.Condition(random_num_head.output <= 5):
             print_op('heads and %s <= 5!' % random_num_head.output)
