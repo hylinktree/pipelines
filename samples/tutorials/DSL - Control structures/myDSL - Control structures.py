@@ -31,6 +31,7 @@ from kfp.components import func_to_container_op, InputPath, OutputPath
 
 # %%
 
+
 @func_to_container_op
 def get_random_int_op(minimum: int, maximum: int) -> int:
     """Generate a random number between minimum and maximum (inclusive)."""
@@ -53,21 +54,23 @@ def flip_coin_op() -> str:
 def print_op(message: str):
     """Print a message."""
     print(message)
-    
+
 
 @dsl.pipeline(
     name='Conditional execution pipeline',
     description='Shows how to use dsl.Condition().'
 )
 def flipcoin_pipeline():
-    lower_thresh = 4
+    lower = 0
+    upper = 9
+    thresh = 3
     flip = flip_coin_op()
     with dsl.Condition(flip.output == 'heads'):
-        random_num_head = get_random_int_op(0, 9)
-        with dsl.Condition(random_num_head.output >lower_thresh):
-            print_op('heads and %s > 5!' % random_num_head.output)
-        with dsl.Condition(random_num_head.output <= 5):
-            print_op('heads and %s <= 5!' % random_num_head.output)
+        random_num_head = get_random_int_op(lower, upper)
+        with dsl.Condition(random_num_head.output > thresh):
+            print_op('heads.%d and %s > %d!' % (random_num_head, random_num_head.output, thresh))
+        with dsl.Condition(random_num_head.output <= thresh):
+            print_op('heads.%d and %s <= %d!' % (random_num_head, random_num_head.output, thresh))
 
     with dsl.Condition(flip.output == 'tails'):
         random_num_tail = get_random_int_op(10, 19)
@@ -89,7 +92,7 @@ def flipcoin_pipeline():
 def fail_op(message):
     """Fails."""
     import sys
-    print(message)    
+    print(message)
     sys.exit(1)
 
 
@@ -116,9 +119,11 @@ def flipcoin_exit_pipeline():
                 print_op('tails and %s <= 15!' % random_num_tail.output)
 
         with dsl.Condition(flip.output == 'tails'):
-            fail_op(message="Failing the run to demonstrate that exit handler still gets executed.")
+            fail_op(
+                message="Failing the run to demonstrate that exit handler still gets executed.")
 
 
 if __name__ == '__main__':
     # Compiling the pipeline
-    kfp.compiler.Compiler().compile(flipcoin_exit_pipeline, __file__ + '.yaml')
+    # kfp.compiler.Compiler().compile(flipcoin_exit_pipeline, __file__ + '.yaml')
+    kfp.compiler.Compiler().compile(flipcoin_pipeline, __file__ + '.yaml')
