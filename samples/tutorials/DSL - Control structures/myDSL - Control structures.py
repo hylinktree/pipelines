@@ -68,10 +68,10 @@ def flipcoin_pipeline():
     with dsl.Condition(flip.output == 'heads'):
         random_num_head = get_random_int_op(lower, upper)
         with dsl.Condition(random_num_head.output > thresh):
-            print_op('heads.%d and %s > %d!' %
+            print_op('heads.%s and %s > %d!' %
                      (random_num_head, random_num_head.output, thresh))
         with dsl.Condition(random_num_head.output <= thresh):
-            print_op('heads.%d and %s <= %d!' %
+            print_op('heads.%s and %s <= %d!' %
                      (random_num_head, random_num_head.output, thresh))
 
     with dsl.Condition(flip.output == 'tails'):
